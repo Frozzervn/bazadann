@@ -1,0 +1,44 @@
+import os
+import sqlite3
+
+
+conn = sqlite3.connect('database.db')
+cursor = conn.cursor()
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS filestest (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    text TEXT,
+    priority INTEGER
+)
+""")
+cursor.execute("INSERT INTO filestest (id, text, priority) VALUES (?, ?, ?)", ('namefile', 'some text', 1))
+conn.commit()
+conn.close()
+
+def to_do_list(filename, content):
+    # Сущ ли заметка
+    if os.path.exists(filename):
+
+        overwrite = input(f"заметка '{filename}' уже существует. Изменить? (w/y): ")
+        if overwrite.lower() != 'y':
+            append = input("Хотите добавить текст в существующий в заметку? (w/y): ")
+            if append.lower() == 'w':
+                additional_content = input("Введите текст для добавления: ")
+                try:
+                    with open(filename, 'a', encoding='utf-8') as file:
+                        file.write('\n' + additional_content)
+                    print(f"Текст добавлен в заметку: {filename}")
+                except Exception as e:
+                    print(f"Произошла ошибка при добавлении текста: {e}")
+            else:
+                print("Заметка не была создана.")
+                return
+    else:
+        try:
+            with open(filename, 'w', encoding='utf-8') as file:
+                file.write(content)
+            print(f"Заметка создана: {filename}")
+        except Exception as e:
+            print(f"Произошла ошибка при создании заметки: {e}")
+
+to_do_list('database.db', '')
